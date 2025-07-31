@@ -1,0 +1,28 @@
+# Ignore source files and tests
+src/
+test/
+
+# Ignore config files not needed in package
+*.log
+*.tsbuildinfo
+*.env
+*.env.*
+
+# Ignore local build artifacts
+coverage/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Ignore workflow files
+docs/
+.github/
+
+# Ignore misc
+*.swp
+*.tmp
+
+# Always include built output
+dist/
+!dist/

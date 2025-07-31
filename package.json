@@ -1,0 +1,48 @@
+{
+  "name": "openf1-js",
+  "version": "0.1.0",
+  "description": "OpenF1 API (https://openf1.org) JavaScript SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "release": "standard-version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ianleckey/openf1-js.git"
+  },
+  "keywords": [
+    "f1",
+    "openf1",
+    "sdk",
+    "api",
+    "formula1"
+  ],
+  "author": "Ian Leckey <ian.leckey@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/ianleckey/openf1-js",
+  "bugs": {
+    "url": "https://github.com/ianleckey/openf1-js/issues"
+  },
+  "dependencies": {
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.5",
+    "nock": "^14.0.7",
+    "standard-version": "^9.5.0",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.9.2"
+  }
+}
