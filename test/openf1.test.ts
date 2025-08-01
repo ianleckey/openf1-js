@@ -358,15 +358,6 @@ describe("OpenF1 SDK Endpoints", () => {
     expect(res).toEqual(expected);
   });
 
-  it("should fetch lap times", async () => {
-    // No sample provided, just check for defined
-    nock(base)
-      .get("/v1/lap_times")
-      .reply(200, [{ lap: 1 }]);
-    const res = await sdk.getLapTimes();
-    expect(res).toBeDefined();
-  });
-
   it("should fetch car data", async () => {
     const expected = [
       {
@@ -450,6 +441,67 @@ describe("OpenF1 SDK Endpoints", () => {
     const res = await sdk.getIntervals({
       session_key: 9165,
       interval: "<0.005",
+    });
+    expect(res).toEqual(expected);
+  });
+
+  it("should fetch team radio", async () => {
+    const expected = [
+      {
+        date: "2023-09-15T09:40:43.005000",
+        driver_number: 11,
+        meeting_key: 1219,
+        recording_url:
+          "https://livetiming.formula1.com/static/2023/2023-09-17_Singapore_Grand_Prix/2023-09-15_Practice_1/TeamRadio/SERPER01_11_20230915_104008.mp3",
+        session_key: 9158,
+      },
+      {
+        date: "2023-09-15T10:32:47.325000",
+        driver_number: 11,
+        meeting_key: 1219,
+        recording_url:
+          "https://livetiming.formula1.com/static/2023/2023-09-17_Singapore_Grand_Prix/2023-09-15_Practice_1/TeamRadio/SERPER01_11_20230915_113201.mp3",
+        session_key: 9158,
+      },
+    ];
+    nock(base)
+      .get("/v1/team_radio")
+      .query({ session_key: 9158, driver_number: 11 })
+      .reply(200, expected);
+    const res = await sdk.getTeamRadio({
+      session_key: 9158,
+      driver_number: 11,
+    });
+    expect(res).toEqual(expected);
+  });
+
+  it("should fetch weather", async () => {
+    const expected = [
+      {
+        air_temperature: 27.8,
+        date: "2023-05-07T18:42:25.233000+00:00",
+        humidity: 58,
+        meeting_key: 1208,
+        pressure: 1018.7,
+        rainfall: 0,
+        session_key: 9078,
+        track_temperature: 52.5,
+        wind_direction: 136,
+        wind_speed: 2.4,
+      },
+    ];
+    nock(base)
+      .get("/v1/weather")
+      .query({
+        meeting_key: 1208,
+        wind_direction: ">=130",
+        track_temperature: ">=52",
+      })
+      .reply(200, expected);
+    const res = await sdk.getWeather({
+      meeting_key: 1208,
+      wind_direction: ">=130",
+      track_temperature: ">=52",
     });
     expect(res).toEqual(expected);
   });

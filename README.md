@@ -16,17 +16,15 @@ npm install openf1-js
 ## Basic Usage
 
 ```js
-import { OpenF1 } from 'openf1-js';
+import { OpenF1 } from "openf1-js";
 
 // Create an API client (default: JSON mode)
 const api = new OpenF1();
 
-// Fetch lap times for a session
-const lapTimes = await api.getLapTimes({ session_key: 1234 });
-
 // Use CSV mode globally
-const apiCsv = new OpenF1({ mode: 'csv' });
-const csvData = await apiCsv.getLapTimes({ session_key: 1234 }); // returns CSV string
+const apiCsv = new OpenF1({ mode: "csv" });
+// All endpoint methods support CSV mode, e.g.:
+const csvData = await apiCsv.getCarData({ session_key: 1234 }); // returns CSV string
 ```
 
 ## Global Options
@@ -44,59 +42,68 @@ All endpoint methods accept an optional `params` object, which is passed as quer
 
 ```js
 // Car data for a specific driver/session, with a filter
-await api.getCarData({ driver_number: 55, session_key: 9159, speed: '>=315' });
+await api.getCarData({ driver_number: 55, session_key: 9159, speed: ">=315" });
 
 // Drivers in a session
 await api.getDrivers({ driver_number: 1, session_key: 9158 });
 
 // Intervals with a filter
-await api.getIntervals({ session_key: 9165, interval: '<0.005' });
-
-// Laps for a driver/session/lap
-await api.getLaps({ session_key: 9161, driver_number: 63, lap_number: 8 });
+await api.getIntervals({ session_key: 9165, interval: "<0.005" });
 
 // Location data in a time window
 await api.getLocation({
   session_key: 9161,
   driver_number: 81,
-  date: '>2023-09-16T13:03:35.200',
-  date2: '<2023-09-16T13:03:35.800',
+  date: ">2023-09-16T13:03:35.200",
+  date2: "<2023-09-16T13:03:35.800",
 });
 
 // Meetings by year/country
-await api.getMeetings({ year: 2023, country_name: 'Singapore' });
+await api.getMeetings({ year: 2023, country_name: "Singapore" });
 
 // Pit stops with duration filter
-await api.getPit({ session_key: 9158, pit_duration: '<31' });
+await api.getPit({ session_key: 9158, pit_duration: "<31" });
 
 // Position for a driver in a meeting
-await api.getPosition({ meeting_key: 1217, driver_number: 40, position: '<=3' });
+await api.getPosition({
+  meeting_key: 1217,
+  driver_number: 40,
+  position: "<=3",
+});
 
 // Race control messages
 await api.getRaceControl({
-  flag: 'BLACK AND WHITE',
+  flag: "BLACK AND WHITE",
   driver_number: 1,
-  date: '>=2023-01-01',
-  date2: '<2023-09-01',
+  date: ">=2023-01-01",
+  date2: "<2023-09-01",
 });
 
 // Sessions by country, name, and year
-await api.getSessions({ country_name: 'Belgium', session_name: 'Sprint', year: 2023 });
+await api.getSessions({
+  country_name: "Belgium",
+  session_name: "Sprint",
+  year: 2023,
+});
 
 // Session results for top 3
-await api.getSessionResult({ session_key: 7782, position: '<=3' });
+await api.getSessionResult({ session_key: 7782, position: "<=3" });
 
 // Starting grid for a session
-await api.getStartingGrid({ session_key: 7783, position: '<=3' });
+await api.getStartingGrid({ session_key: 7783, position: "<=3" });
 
 // Stints with tyre age filter
-await api.getStints({ session_key: 9165, tyre_age_at_start: '>=3' });
+await api.getStints({ session_key: 9165, tyre_age_at_start: ">=3" });
 
 // Team radio for a driver/session
 await api.getTeamRadio({ session_key: 9158, driver_number: 11 });
 
 // Weather with filters
-await api.getWeather({ meeting_key: 1208, wind_direction: '>=130', track_temperature: '>=52' });
+await api.getWeather({
+  meeting_key: 1208,
+  wind_direction: ">=130",
+  track_temperature: ">=52",
+});
 ```
 
 ## Endpoint Attributes & Parameters
@@ -161,29 +168,6 @@ Below are the request parameters (query params) and response attributes for each
 | interval      | number\|string\|null | seconds, '+1 LAP', or null |
 | meeting_key   | number               |                            |
 | session_key   | number               |                            |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Laps (`getLaps`)
-
-| Name              | Type     | Description |
-| ----------------- | -------- | ----------- |
-| date_start        | string   | ISO 8601    |
-| driver_number     | number   |             |
-| duration_sector_1 | number   |             |
-| duration_sector_2 | number   |             |
-| duration_sector_3 | number   |             |
-| i1_speed          | number   |             |
-| i2_speed          | number   |             |
-| is_pit_out_lap    | boolean  |             |
-| lap_duration      | number   |             |
-| lap_number        | number   |             |
-| meeting_key       | number   |             |
-| segments_sector_1 | number[] |             |
-| segments_sector_2 | number[] |             |
-| segments_sector_3 | number[] |             |
-| session_key       | number   |             |
-| st_speed          | number   |             |
 
 **Request params:** Any of the above fields can be used as a query param.
 
@@ -329,29 +313,73 @@ Below are the request parameters (query params) and response attributes for each
 
 ### Team Radio (`getTeamRadio`)
 
-| Name          | Type   | Description |
-| ------------- | ------ | ----------- |
-| date          | string |             |
-| driver_number | number |             |
-| meeting_key   | number |             |
-| recording_url | string |             |
-| session_key   | number |             |
+Provides a collection of radio exchanges between Formula 1 drivers and their respective teams during sessions. Only a limited selection of communications are included.
 
-**Request params:** Any of the above fields can be used as a query param.
+| Name          | Type   | Description                                 |
+| ------------- | ------ | ------------------------------------------- |
+| date          | string | The UTC date and time, in ISO 8601 format.  |
+| driver_number | number | The unique number assigned to an F1 driver. |
+| meeting_key   | number | The unique identifier for the meeting.      |
+| recording_url | string | URL of the radio recording.                 |
+| session_key   | number | The unique identifier for the session.      |
+
+**Request params:** Any of the above fields can be used as a query param (e.g. `session_key`, `driver_number`).
+
+**Sample response:**
+
+```
+[
+  {
+    "date": "2023-09-15T09:40:43.005000",
+    "driver_number": 11,
+    "meeting_key": 1219,
+    "recording_url": "https://livetiming.formula1.com/static/2023/2023-09-17_Singapore_Grand_Prix/2023-09-15_Practice_1/TeamRadio/SERPER01_11_20230915_104008.mp3",
+    "session_key": 9158
+  },
+  {
+    "date": "2023-09-15T10:32:47.325000",
+    "driver_number": 11,
+    "meeting_key": 1219,
+    "recording_url": "https://livetiming.formula1.com/static/2023/2023-09-17_Singapore_Grand_Prix/2023-09-15_Practice_1/TeamRadio/SERPER01_11_20230915_113201.mp3",
+    "session_key": 9158
+  }
+]
+```
 
 ### Weather (`getWeather`)
 
-| Name              | Type   | Description |
-| ----------------- | ------ | ----------- |
-| air_temperature   | number |             |
-| date              | string |             |
-| humidity          | number |             |
-| meeting_key       | number |             |
-| pressure          | number |             |
-| rainfall          | number |             |
-| session_key       | number |             |
-| track_temperature | number |             |
-| wind_direction    | number |             |
-| wind_speed        | number |             |
+The weather over the track, updated every minute.
 
-**Request params:** Any of the above fields can be used as a query param.
+| Name              | Type   | Description                                |
+| ----------------- | ------ | ------------------------------------------ |
+| air_temperature   | number | Air temperature (°C).                      |
+| date              | string | The UTC date and time, in ISO 8601 format. |
+| humidity          | number | Relative humidity (%).                     |
+| meeting_key       | number | The unique identifier for the meeting.     |
+| pressure          | number | Air pressure (mbar).                       |
+| rainfall          | number | Whether there is rainfall.                 |
+| session_key       | number | The unique identifier for the session.     |
+| track_temperature | number | Track temperature (°C).                    |
+| wind_direction    | number | Wind direction (°), from 0° to 359°.       |
+| wind_speed        | number | Wind speed (m/s).                          |
+
+**Request params:** Any of the above fields can be used as a query param (e.g. `meeting_key`, `wind_direction`, `track_temperature`).
+
+**Sample response:**
+
+```
+[
+  {
+    "air_temperature": 27.8,
+    "date": "2023-05-07T18:42:25.233000+00:00",
+    "humidity": 58,
+    "meeting_key": 1208,
+    "pressure": 1018.7,
+    "rainfall": 0,
+    "session_key": 9078,
+    "track_temperature": 52.5,
+    "wind_direction": 136,
+    "wind_speed": 2.4
+  }
+]
+```

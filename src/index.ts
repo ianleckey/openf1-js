@@ -70,9 +70,6 @@ export class OpenF1 {
   async getLaps(params?: Record<string, any>): Promise<Lap[] | string> {
     return this._request<Lap[]>("laps", params);
   }
-  async getLapTimes(params?: Record<string, any>): Promise<any[] | string> {
-    return this._request<any[]>("lap_times", params);
-  }
   async getCarData(params?: Record<string, any>): Promise<CarData[] | string> {
     return this._request<CarData[]>("car_data", params);
   }
@@ -83,6 +80,16 @@ export class OpenF1 {
     params?: Record<string, any>
   ): Promise<Interval[] | string> {
     return this._request<Interval[]>("intervals", params);
+  }
+
+  async getTeamRadio(
+    params?: Record<string, any>
+  ): Promise<TeamRadio[] | string> {
+    return this._request<TeamRadio[]>("team_radio", params);
+  }
+
+  async getWeather(params?: Record<string, any>): Promise<Weather[] | string> {
+    return this._request<Weather[]>("weather", params);
   }
 }
 import axios, { AxiosInstance } from "axios";
@@ -101,6 +108,8 @@ import type {
   SessionResult,
   StartingGrid,
   Stint,
+  TeamRadio,
+  Weather,
 } from "./types.js";
 
 // Re-export all endpoint types for consumers
@@ -118,4 +127,6 @@ export type {
   SessionResult,
   StartingGrid,
   Stint,
+  TeamRadio,
+  Weather,
 } from "./types.js";
