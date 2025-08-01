@@ -86,7 +86,25 @@ export class OpenF1 {
   }
 }
 import axios, { AxiosInstance } from "axios";
+
 import type {
+  CarData,
+  Driver,
+  Interval,
+  Lap,
+  Location,
+  Meeting,
+  Pit,
+  Position,
+  RaceControl,
+  Session,
+  SessionResult,
+  StartingGrid,
+  Stint,
+} from "./types";
+
+// Re-export all endpoint types for consumers
+export type {
   CarData,
   Driver,
   Interval,
