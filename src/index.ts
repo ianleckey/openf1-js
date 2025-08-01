@@ -101,7 +101,7 @@ import type {
   SessionResult,
   StartingGrid,
   Stint,
-} from "./types";
+} from "./types.js";
 
 // Re-export all endpoint types for consumers
 export type {
@@ -118,4 +118,4 @@ export type {
   SessionResult,
   StartingGrid,
   Stint,
-} from "./types";
+} from "./types.js";
