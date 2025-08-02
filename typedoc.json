@@ -1,0 +1,13 @@
+{
+  "entryPoints": [
+    "src/index.ts"
+  ],
+  "out": "docs",
+  "tsconfig": "tsconfig.json",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "includeVersion": true,
+  "hideGenerator": true,
+  "name": "OpenF1 JS SDK",
+  "readme": "README.md"
+}

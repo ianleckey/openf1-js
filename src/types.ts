@@ -1,4 +1,4 @@
-export interface TeamRadio {
+export interface TeamRadioType {
   date: string;
   driver_number: number;
   meeting_key: number;
@@ -6,7 +6,7 @@ export interface TeamRadio {
   session_key: number;
 }
 
-export interface Weather {
+export interface WeatherType {
   air_temperature: number;
   date: string;
   humidity: number;
@@ -18,7 +18,7 @@ export interface Weather {
   wind_direction: number;
   wind_speed: number;
 }
-export interface Session {
+export interface SessionType {
   circuit_key: number;
   circuit_short_name: string;
   country_code: string;
@@ -35,7 +35,7 @@ export interface Session {
   year: number;
 }
 
-export interface SessionResult {
+export interface SessionResultType {
   dnf: boolean;
   dns: boolean;
   dsq: boolean;
@@ -48,7 +48,7 @@ export interface SessionResult {
   session_key: number;
 }
 
-export interface StartingGrid {
+export interface StartingGridType {
   position: number;
   driver_number: number;
   lap_duration: number;
@@ -56,7 +56,7 @@ export interface StartingGrid {
   session_key: number;
 }
 
-export interface Stint {
+export interface StintType {
   compound: string;
   driver_number: number;
   lap_end: number;
@@ -66,7 +66,7 @@ export interface Stint {
   stint_number: number;
   tyre_age_at_start: number;
 }
-export interface Meeting {
+export interface MeetingType {
   circuit_key: number;
   circuit_short_name: string;
   country_code: string;
@@ -81,7 +81,7 @@ export interface Meeting {
   year: number;
 }
 
-export interface Pit {
+export interface PitType {
   date: string;
   driver_number: number;
   lap_number: number;
@@ -90,7 +90,7 @@ export interface Pit {
   session_key: number;
 }
 
-export interface Position {
+export interface PositionType {
   date: string;
   driver_number: number;
   meeting_key: number;
@@ -98,7 +98,7 @@ export interface Position {
   session_key: number;
 }
 
-export interface RaceControl {
+export interface RaceControlType {
   category: string;
   date: string;
   driver_number: number;
@@ -110,7 +110,7 @@ export interface RaceControl {
   sector: number | null;
   session_key: number;
 }
-export interface Location {
+export interface LocationType {
   date: string; // ISO 8601
   driver_number: number;
   meeting_key: number;
@@ -121,7 +121,7 @@ export interface Location {
 }
 
 // Types and interfaces for OpenF1 SDK
-export interface Lap {
+export interface LapType {
   date_start: string; // ISO 8601
   driver_number: number;
   duration_sector_1: number;
@@ -140,7 +140,7 @@ export interface Lap {
   st_speed: number;
 }
 
-export interface CarData {
+export interface CarDataType {
   brake: number; // 0 or 100
   date: string; // ISO 8601
   driver_number: number;
@@ -153,7 +153,7 @@ export interface CarData {
   throttle: number;
 }
 
-export interface Driver {
+export interface DriverType {
   broadcast_name: string;
   country_code: string;
   driver_number: number;
@@ -168,7 +168,7 @@ export interface Driver {
   team_name: string;
 }
 
-export interface Interval {
+export interface IntervalType {
   date: string; // ISO 8601
   driver_number: number;
   gap_to_leader: number | string | null; // seconds, "+1 LAP", or null
