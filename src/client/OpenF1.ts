@@ -1,26 +1,37 @@
-// src/client/OpenF1.ts
-import { Transport, OpenF1TransportOptions } from "../transport/Transport.js";
+import { Transport, TransportOptions } from "../transport/Transport.js";
+import {
+  createFetcherRegistry,
+  FetcherRegistry,
+} from "../fetchers/FetcherRegistry.js";
 import { RaceWeekend } from "../entities/RaceWeekend.js";
-import { SessionType, CarDataType } from "../types.js";
 
 export class OpenF1 {
-  private transport: Transport;
+  readonly transport: Transport;
+  readonly fetchers: FetcherRegistry;
 
-  constructor(options: OpenF1TransportOptions = {}) {
+  constructor(options: TransportOptions = {}) {
     this.transport = new Transport(options);
+    this.fetchers = createFetcherRegistry(this.transport);
   }
-
-  /*
-  async getSessions(params?: Record<string, any>): Promise<SessionType[]> {
-    return this.transport.request<SessionType[]>("sessions", params);
-  }
-
-  async getCarData(params?: Record<string, any>): Promise<CarDataType[]> {
-    return this.transport.request<CarDataType[]>("car_data", params);
-  }
-    */
 
   getRaceWeekend(meetingKey: number): RaceWeekend {
-    return new RaceWeekend(meetingKey, this.transport);
+    return new RaceWeekend(meetingKey, this.fetchers);
+  }
+
+  /**
+   * Lists all available endpoints that can be accessed through the OpenF1 client.
+   * This method provides a way to discover all registered fetcher endpoints.
+   *
+   * @returns {string[]} An array of strings representing the names of all available API endpoints.
+   *
+   * @example
+   * ```typescript
+   * const client = new OpenF1();
+   * const endpoints = client.listAvailableEndpoints();
+   * // Returns: ['drivers', 'sessions', 'timing', ...]
+   * ```
+   */
+  listAvailableEndpoints(): string[] {
+    return Object.keys(this.fetchers);
   }
 }

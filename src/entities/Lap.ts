@@ -1,41 +1,26 @@
 import { LapType } from "../types.js";
 
-export class Lap {
-  date_start: string;
-  driver_number: number;
-  duration_sector_1: number;
-  duration_sector_2: number;
-  duration_sector_3: number;
-  i1_speed: number;
-  i2_speed: number;
-  is_pit_out_lap: boolean;
-  lap_duration: number;
-  lap_number: number;
-  meeting_key: number;
-  segments_sector_1: number[];
-  segments_sector_2: number[];
-  segments_sector_3: number[];
-  session_key: number;
-  st_speed: number;
-
-  constructor(data: LapType) {
-    this.date_start = data.date_start;
-    this.driver_number = data.driver_number;
-    this.duration_sector_1 = data.duration_sector_1;
-    this.duration_sector_2 = data.duration_sector_2;
-    this.duration_sector_3 = data.duration_sector_3;
-    this.i1_speed = data.i1_speed;
-    this.i2_speed = data.i2_speed;
-    this.is_pit_out_lap = data.is_pit_out_lap;
-    this.lap_duration = data.lap_duration;
-    this.lap_number = data.lap_number;
-    this.meeting_key = data.meeting_key;
-    this.segments_sector_1 = data.segments_sector_1;
-    this.segments_sector_2 = data.segments_sector_2;
-    this.segments_sector_3 = data.segments_sector_3;
-    this.session_key = data.session_key;
-    this.st_speed = data.st_speed;
+export class Lap implements LapType {
+  constructor(public readonly data: LapType) {
+    Object.assign(this, data);
   }
+
+  readonly date_start = this.data.date_start;
+  readonly driver_number = this.data.driver_number;
+  readonly duration_sector_1 = this.data.duration_sector_1;
+  readonly duration_sector_2 = this.data.duration_sector_2;
+  readonly duration_sector_3 = this.data.duration_sector_3;
+  readonly i1_speed = this.data.i1_speed;
+  readonly i2_speed = this.data.i2_speed;
+  readonly is_pit_out_lap = this.data.is_pit_out_lap;
+  readonly lap_duration = this.data.lap_duration;
+  readonly lap_number = this.data.lap_number;
+  readonly meeting_key = this.data.meeting_key;
+  readonly segments_sector_1 = this.data.segments_sector_1;
+  readonly segments_sector_2 = this.data.segments_sector_2;
+  readonly segments_sector_3 = this.data.segments_sector_3;
+  readonly session_key = this.data.session_key;
+  readonly st_speed = this.data.st_speed;
 
   get durationMs(): number {
     return this.lap_duration * 1000;
@@ -49,9 +34,5 @@ export class Lap {
     const delta = this.deltaTo(reference);
     const sign = delta >= 0 ? "+" : "-";
     return `${sign}${Math.abs(delta).toFixed(3)}s`;
-  }
-
-  static fromArray(data: LapType[]): Lap[] {
-    return data.map((d) => new Lap(d));
   }
 }

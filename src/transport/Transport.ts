@@ -1,62 +1,62 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 
-export interface OpenF1TransportOptions {
+export interface TransportOptions {
   baseURL?: string;
-  mode?: "json" | "csv";
-  maxRetries?: number;
+  retries?: number;
   retryDelayMs?: number;
+  mode?: "json" | "csv";
 }
 
 export class Transport {
   private axios: AxiosInstance;
+  private retries: number;
+  private delay: number;
   private mode: "json" | "csv";
-  private maxRetries: number;
-  private retryDelayMs: number;
 
-  constructor(options: OpenF1TransportOptions = {}) {
-    this.mode = options.mode === "csv" ? "csv" : "json";
-    this.maxRetries = options.maxRetries ?? 3;
-    this.retryDelayMs = options.retryDelayMs ?? 500;
+  constructor(opts: TransportOptions = {}) {
+    this.retries = opts.retries ?? 3;
+    this.delay = opts.retryDelayMs ?? 500;
+    this.mode = opts.mode ?? "json";
 
     this.axios = axios.create({
-      baseURL: options.baseURL || "https://api.openf1.org/v1/",
+      baseURL: opts.baseURL || "https://api.openf1.org/v1/",
     });
   }
 
-  private async requestWithRetry<T>(
+  private async retry<T>(
     endpoint: string,
     config: AxiosRequestConfig
-  ): Promise<T | string> {
+  ): Promise<T> {
     let attempt = 0;
-    while (attempt <= this.maxRetries) {
+    while (attempt <= this.retries) {
       try {
         const res = await this.axios.get(endpoint, config);
         return res.data;
-      } catch (error: any) {
-        const isRateLimit = error?.response?.status === 429;
-        if (isRateLimit && attempt < this.maxRetries) {
-          const delay = this.retryDelayMs * Math.pow(2, attempt);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          attempt++;
+      } catch (err: any) {
+        if (err?.response?.status === 429 && attempt < this.retries) {
+          await new Promise((res) =>
+            setTimeout(res, this.delay * Math.pow(2, attempt++))
+          );
         } else {
-          throw error;
+          throw err;
         }
       }
     }
-    throw new Error("Max retry attempts exceeded");
+    throw new Error("Transport: Exceeded max retry attempts.");
   }
 
-  async request<T = any>(endpoint: string, params?: Record<string, any>): Promise<T | string> {
-    const useCsv = this.mode === "csv";
-    const reqParams = { ...(params || {}) };
-    if (useCsv) reqParams.csv = true;
+  async request<T = any>(
+    endpoint: string,
+    params: Record<string, any> = {}
+  ): Promise<T> {
+    if (this.mode === "csv") params.csv = true;
 
     const config: AxiosRequestConfig = {
-      params: reqParams,
-      headers: useCsv ? { Accept: "text/csv" } : undefined,
-      responseType: useCsv ? "text" : "json",
+      params,
+      headers: this.mode === "csv" ? { Accept: "text/csv" } : undefined,
+      responseType: this.mode === "csv" ? "text" : "json",
     };
 
-    return this.requestWithRetry<T>(endpoint, config);
+    return this.retry<T>(endpoint, config);
   }
 }

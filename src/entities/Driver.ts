@@ -1,35 +1,20 @@
 import { DriverType } from "../types.js";
 
-export class Driver {
-  broadcast_name: string;
-  country_code: string;
-  driver_number: number;
-  first_name: string;
-  full_name: string;
-  headshot_url: string;
-  last_name: string;
-  meeting_key: number;
-  name_acronym: string;
-  session_key: number;
-  team_colour: string;
-  team_name: string;
-
-  constructor(data: DriverType) {
-    this.broadcast_name = data.broadcast_name;
-    this.country_code = data.country_code;
-    this.driver_number = data.driver_number;
-    this.first_name = data.first_name;
-    this.full_name = data.full_name;
-    this.headshot_url = data.headshot_url;
-    this.last_name = data.last_name;
-    this.meeting_key = data.meeting_key;
-    this.name_acronym = data.name_acronym;
-    this.session_key = data.session_key;
-    this.team_colour = data.team_colour;
-    this.team_name = data.team_name;
+export class Driver implements DriverType {
+  constructor(public readonly data: DriverType) {
+    Object.assign(this, data);
   }
 
-  static fromArray(data: DriverType[]): Driver[] {
-    return data.map((d) => new Driver(d));
-  }
+  readonly broadcast_name = this.data.broadcast_name;
+  readonly country_code = this.data.country_code;
+  readonly driver_number = this.data.driver_number;
+  readonly first_name = this.data.first_name;
+  readonly full_name = this.data.full_name;
+  readonly headshot_url = this.data.headshot_url;
+  readonly last_name = this.data.last_name;
+  readonly meeting_key = this.data.meeting_key;
+  readonly name_acronym = this.data.name_acronym;
+  readonly session_key = this.data.session_key;
+  readonly team_colour = this.data.team_colour;
+  readonly team_name = this.data.team_name;
 }

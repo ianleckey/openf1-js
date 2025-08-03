@@ -1,21 +1,13 @@
 import { PositionType } from "../types.js";
 
-export class Position {
-  date: string;
-  driver_number: number;
-  meeting_key: number;
-  position: number;
-  session_key: number;
-
-  constructor(data: PositionType) {
-    this.date = data.date;
-    this.driver_number = data.driver_number;
-    this.meeting_key = data.meeting_key;
-    this.position = data.position;
-    this.session_key = data.session_key;
+export class Position implements PositionType {
+  constructor(public readonly data: PositionType) {
+    Object.assign(this, data);
   }
 
-  static fromArray(data: PositionType[]): Position[] {
-    return data.map((d) => new Position(d));
-  }
+  readonly date = this.data.date;
+  readonly driver_number = this.data.driver_number;
+  readonly meeting_key = this.data.meeting_key;
+  readonly position = this.data.position;
+  readonly session_key = this.data.session_key;
 }

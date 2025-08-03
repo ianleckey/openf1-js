@@ -1,21 +1,13 @@
 import { StartingGridType } from "../types.js";
 
-export class StartingGrid {
-  position: number;
-  driver_number: number;
-  lap_duration: number;
-  meeting_key: number;
-  session_key: number;
-
-  constructor(data: StartingGridType) {
-    this.position = data.position;
-    this.driver_number = data.driver_number;
-    this.lap_duration = data.lap_duration;
-    this.meeting_key = data.meeting_key;
-    this.session_key = data.session_key;
+export class StartingGrid implements StartingGridType {
+  constructor(public readonly data: StartingGridType) {
+    Object.assign(this, data);
   }
 
-  static fromArray(data: StartingGridType[]): StartingGrid[] {
-    return data.map((d) => new StartingGrid(d));
-  }
+  readonly position = this.data.position;
+  readonly driver_number = this.data.driver_number;
+  readonly lap_duration = this.data.lap_duration;
+  readonly meeting_key = this.data.meeting_key;
+  readonly session_key = this.data.session_key;
 }

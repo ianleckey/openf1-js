@@ -12,3 +12,4 @@ export * from "./DriverFetcher.js";
 export * from "./IntervalFetcher.js";
 export * from "./TeamRadioFetcher.js";
 export * from "./WeatherFetcher.js";
+export * from "./MeetingFetcher.js";

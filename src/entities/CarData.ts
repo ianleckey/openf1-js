@@ -1,29 +1,20 @@
 import { CarDataType } from "../types.js";
 
-export class CarData {
-  brake: number;
-  date: string;
-  driver_number: number;
-  drs: number;
-  meeting_key: number;
-  n_gear: number;
-  rpm: number;
-  session_key: number;
-  speed: number;
-  throttle: number;
-
-  constructor(data: CarDataType) {
-    this.brake = data.brake;
-    this.date = data.date;
-    this.driver_number = data.driver_number;
-    this.drs = data.drs;
-    this.meeting_key = data.meeting_key;
-    this.n_gear = data.n_gear;
-    this.rpm = data.rpm;
-    this.session_key = data.session_key;
-    this.speed = data.speed;
-    this.throttle = data.throttle;
+export class CarData implements CarDataType {
+  constructor(public readonly data: CarDataType) {
+    Object.assign(this, data);
   }
+
+  readonly brake = this.data.brake;
+  readonly date = this.data.date;
+  readonly driver_number = this.data.driver_number;
+  readonly drs = this.data.drs;
+  readonly meeting_key = this.data.meeting_key;
+  readonly n_gear = this.data.n_gear;
+  readonly rpm = this.data.rpm;
+  readonly session_key = this.data.session_key;
+  readonly speed = this.data.speed;
+  readonly throttle = this.data.throttle;
 
   get speedKmh(): number {
     return this.speed;
@@ -36,9 +27,5 @@ export class CarData {
   estimateDistance(travelTimeSec: number): number | null {
     if (typeof this.speed !== "number") return null;
     return this.speed * (travelTimeSec / 3600); // speed in km/h, result in km
-  }
-
-  static fromArray(data: CarDataType[]): CarData[] {
-    return data.map((d) => new CarData(d));
   }
 }

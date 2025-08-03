@@ -1,25 +1,15 @@
 import { LocationType } from "../types.js";
 
-export class Location {
-  date: string;
-  driver_number: number;
-  meeting_key: number;
-  session_key: number;
-  x: number;
-  y: number;
-  z: number;
-
-  constructor(data: LocationType) {
-    this.date = data.date;
-    this.driver_number = data.driver_number;
-    this.meeting_key = data.meeting_key;
-    this.session_key = data.session_key;
-    this.x = data.x;
-    this.y = data.y;
-    this.z = data.z;
+export class Location implements LocationType {
+  constructor(public readonly data: LocationType) {
+    Object.assign(this, data);
   }
 
-  static fromArray(data: LocationType[]): Location[] {
-    return data.map((d) => new Location(d));
-  }
+  readonly date = this.data.date;
+  readonly driver_number = this.data.driver_number;
+  readonly meeting_key = this.data.meeting_key;
+  readonly session_key = this.data.session_key;
+  readonly x = this.data.x;
+  readonly y = this.data.y;
+  readonly z = this.data.z;
 }

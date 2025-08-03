@@ -1,21 +1,13 @@
 import { TeamRadioType } from "../types.js";
 
-export class TeamRadio {
-  date: string;
-  driver_number: number;
-  meeting_key: number;
-  recording_url: string;
-  session_key: number;
-
-  constructor(data: TeamRadioType) {
-    this.date = data.date;
-    this.driver_number = data.driver_number;
-    this.meeting_key = data.meeting_key;
-    this.recording_url = data.recording_url;
-    this.session_key = data.session_key;
+export class TeamRadio implements TeamRadioType {
+  constructor(public readonly data: TeamRadioType) {
+    Object.assign(this, data);
   }
 
-  static fromArray(data: TeamRadioType[]): TeamRadio[] {
-    return data.map((d) => new TeamRadio(d));
-  }
+  readonly date = this.data.date;
+  readonly driver_number = this.data.driver_number;
+  readonly meeting_key = this.data.meeting_key;
+  readonly recording_url = this.data.recording_url;
+  readonly session_key = this.data.session_key;
 }
