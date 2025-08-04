@@ -13,7 +13,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "build:clean": "rm -rf dist && tsc",
+    "test": "tsx --test",
+    "test:windows": "tsx --test test/**/*.test.ts",
     "release": "standard-version",
     "docs": "typedoc"
   },
@@ -39,12 +41,11 @@
     "axios": "^1.11.0"
   },
   "devDependencies": {
-    "typedoc": "^0.25.0",
-    "@types/jest": "^30.0.0",
-    "jest": "^30.0.5",
-    "nock": "^14.0.7",
+    "@types/node": "^24.1.0",
     "standard-version": "^9.5.0",
-    "ts-jest": "^29.4.0",
+    "testdouble": "^3.20.2",
+    "tsx": "^4.20.3",
+    "typedoc": "^0.28.9",
     "typescript": "^5.9.2"
   }
 }

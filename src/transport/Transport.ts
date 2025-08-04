@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { FetchError, NotFoundError } from "../errors/OpenF1Error.js";
 
 export interface TransportOptions {
   baseURL?: string;
@@ -33,16 +34,29 @@ export class Transport {
         const res = await this.axios.get(endpoint, config);
         return res.data;
       } catch (err: any) {
-        if (err?.response?.status === 429 && attempt < this.retries) {
+        const status = err?.response?.status;
+        if (status === 429 && attempt < this.retries) {
           await new Promise((res) =>
             setTimeout(res, this.delay * Math.pow(2, attempt++))
           );
+        } else if (status === 404) {
+          throw new NotFoundError(endpoint);
+        } else if (status) {
+          throw new FetchError(
+            `Failed to fetch ${endpoint}: ${err.message}`,
+            status
+          );
         } else {
-          throw err;
+          throw new FetchError(
+            `Network or unknown error while fetching ${endpoint}: ${
+              err?.message || err
+            }`,
+            undefined
+          );
         }
       }
     }
-    throw new Error("Transport: Exceeded max retry attempts.");
+    throw new FetchError("Transport: Exceeded max retry attempts.");
   }
 
   async request<T = any>(

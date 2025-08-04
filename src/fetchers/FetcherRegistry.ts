@@ -1,5 +1,5 @@
-import { PitFetcher } from "./PitFetcher.js";
 import { Transport } from "../transport/Transport.js";
+
 import {
   CarDataFetcher,
   DriverFetcher,
@@ -11,9 +11,14 @@ import {
   TeamRadioFetcher,
   WeatherFetcher,
   SessionFetcher,
+  PitFetcher,
+  StintFetcher,
+  StartingGridFetcher,
+  LapFetcher,
+  LocationFetcher,
 } from "./index.js";
 
-export interface FetcherRegistry {
+export type FetcherRegistry = {
   pit: PitFetcher;
   session: SessionFetcher;
   driver: DriverFetcher;
@@ -25,20 +30,16 @@ export interface FetcherRegistry {
   raceControl: RaceControlFetcher;
   sessionResult: SessionResultFetcher;
   meeting: MeetingFetcher;
-}
+  location: LocationFetcher;
+  stint: StintFetcher;
+  startingGrid: StartingGridFetcher;
+  lap: LapFetcher;
+};
 
 export function createFetcherRegistry(transport: Transport): FetcherRegistry {
-  const sessionRegistry = {} as FetcherRegistry;
-  sessionRegistry.pit = new PitFetcher(transport);
-  sessionRegistry.carData = new CarDataFetcher(transport);
-  sessionRegistry.teamRadio = new TeamRadioFetcher(transport);
-  sessionRegistry.raceControl = new RaceControlFetcher(transport);
-  sessionRegistry.interval = new IntervalFetcher(transport);
-  sessionRegistry.position = new PositionFetcher(transport);
-  sessionRegistry.sessionResult = new SessionResultFetcher(transport);
   return {
     pit: new PitFetcher(transport),
-    session: new SessionFetcher(transport, sessionRegistry),
+    session: new SessionFetcher(transport),
     driver: new DriverFetcher(transport),
     weather: new WeatherFetcher(transport),
     interval: new IntervalFetcher(transport),
@@ -48,5 +49,9 @@ export function createFetcherRegistry(transport: Transport): FetcherRegistry {
     raceControl: new RaceControlFetcher(transport),
     sessionResult: new SessionResultFetcher(transport),
     meeting: new MeetingFetcher(transport),
+    location: new LocationFetcher(transport),
+    stint: new StintFetcher(transport),
+    startingGrid: new StartingGridFetcher(transport),
+    lap: new LapFetcher(transport),
   };
 }

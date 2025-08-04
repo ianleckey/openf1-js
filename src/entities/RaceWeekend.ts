@@ -2,6 +2,7 @@ import { Meeting } from "./Meeting.js";
 import { Driver } from "./Driver.js";
 import { Session } from "./Session.js";
 import { FetcherRegistry } from "../fetchers/FetcherRegistry.js";
+import { OpenF1Error } from "../errors/OpenF1Error.js";
 
 export class RaceWeekend {
   private _meeting?: Meeting;
@@ -12,16 +13,7 @@ export class RaceWeekend {
     public readonly meetingKey: number,
     private readonly fetchers: Pick<
       FetcherRegistry,
-      | "meeting"
-      | "session"
-      | "driver"
-      | "pit"
-      | "carData"
-      | "teamRadio"
-      | "raceControl"
-      | "interval"
-      | "position"
-      | "sessionResult"
+      "meeting" | "session" | "driver"
     >
   ) {}
 
@@ -31,10 +23,10 @@ export class RaceWeekend {
         meeting_key: this.meetingKey,
       });
       if (!meeting)
-        throw new Error(`No meeting found for key ${this.meetingKey}`);
+        throw new OpenF1Error(`No meeting found for key ${this.meetingKey}`);
       this._meeting = meeting;
     }
-    return this._meeting;
+    return this._meeting!;
   }
 
   async drivers(): Promise<Driver[]> {
@@ -48,12 +40,9 @@ export class RaceWeekend {
 
   async sessions(): Promise<Session[]> {
     if (!this._sessions) {
-      const raw = await this.fetchers.session.fetch({
+      this._sessions = await this.fetchers.session.fetch({
         meeting_key: this.meetingKey,
       });
-      this._sessions = raw.map(
-        (session) => new Session(session, this.fetchers)
-      );
     }
     return this._sessions;
   }
