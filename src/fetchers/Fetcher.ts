@@ -23,4 +23,14 @@ export abstract class Fetcher<TType, TEntity> {
     this.cache.set(cacheKey, entities);
     return entities;
   }
+
+  async fetchOne(params: Partial<TType>): Promise<TEntity> {
+    const entities = await this.fetch(params);
+    if (entities.length === 0) {
+      throw new FetchError(
+        `No ${this.endpoint} found for params: ${JSON.stringify(params)}`
+      );
+    }
+    return entities[0];
+  }
 }
