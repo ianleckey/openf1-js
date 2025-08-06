@@ -38,7 +38,8 @@
     "url": "https://github.com/ianleckey/openf1-js/issues"
   },
   "dependencies": {
-    "axios": "^1.11.0"
+    "axios": "^1.11.0",
+    "axios-retry": "^4.5.0"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
