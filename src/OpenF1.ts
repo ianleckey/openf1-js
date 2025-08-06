@@ -22,7 +22,10 @@ import { Transport } from "./core/Transport.js";
 import { OpenF1Error } from "./errors/OpenF1Error.js";
 
 export interface OpenF1Options {
-  transportMode: "rest" | "websocket" | "mqtt";
+  transportMode:
+    | "rest"
+    | "websocket" /** @todo implement websocket mode */
+    | "mqtt" /** @todo implement mqtt mode */;
   auth?: {
     username: string;
     password: string;
