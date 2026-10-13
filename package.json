@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ianleckey/openf1-js.git"
+    "url": "git+https://github.com/ianleckey/openf1-js.git"
   },
   "license": "MIT",
   "author": "Ian Leckey <ileckey@proton.me>",
