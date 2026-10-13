@@ -12,7 +12,7 @@ The 0.2 API is now stable. See "Versioning" in the README for what that covers.
 - **`Resource` and `SessionScope` are exported as types only.** Get instances from `f1.<endpoint>` and `f1.session()`.
 - **The `serializeQuery` helper is no longer exported.**
 
-### 0.2.0 (unreleased)
+### 0.2.0 (2026-10-13)
 
 #### Features
 
