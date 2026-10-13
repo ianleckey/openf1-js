@@ -1,6 +1,6 @@
 {
   "name": "openf1-js",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "OpenF1 API (https://openf1.org) JavaScript SDK",
   "keywords": [
     "f1",
