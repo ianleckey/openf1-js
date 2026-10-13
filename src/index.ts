@@ -7,9 +7,9 @@ export {
 } from "./client.js";
 export { OpenF1Error, isNoResults } from "./errors.js";
 export type { Format, RequestOptions } from "./http.js";
-export { serializeQuery, type Filter, type Query, type Range } from "./query.js";
-export { Resource } from "./resource.js";
-export { SessionScope, type ScopedQuery } from "./session-scope.js";
+export type { Filter, Query, Range } from "./query.js";
+export type { Resource } from "./resource.js";
+export type { ScopedQuery, SessionScope } from "./session-scope.js";
 export type {
   CarData,
   ChampionshipDriver,

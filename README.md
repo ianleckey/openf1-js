@@ -195,9 +195,27 @@ const fastLaps: Query<Lap> = { session_key: 9161, lap_duration: { lt: 100 } };
 const laps: Lap[] = await f1.laps.list(fastLaps);
 ```
 
-Some fields can be `null` at runtime even though they are typed as non-null, for example `lap_duration` on an out-lap or `drs` from 2026 onwards. This keeps 0.1.x code compiling. Those fields are flagged in their hover docs, and 1.0 will make the types nullable.
+Fields that OpenF1 can return as `null` are typed that way, for example `lap_duration` on an out-lap or `drs` from 2026 onwards. Handle `null` before doing arithmetic:
+
+```ts
+const timed = laps.filter((lap): lap is Lap & { lap_duration: number } => lap.lap_duration !== null);
+```
+
+## Upgrading to 1.0
+
+1.0 freezes the API introduced in 0.2. The only breaking change is in the types: **response fields that OpenF1 can return as `null` are now typed as nullable.** With `strictNullChecks`, TypeScript will point out the places that need a null check. Runtime behaviour is unchanged, and the legacy `getX()` methods still work.
+
+The affected fields are:
+
+- **`Lap`:** sector times, speeds, `lap_duration`, `date_start` and segments
+- **`SessionResult`:** `position`, `duration`, `gap_to_leader` and `number_of_laps`
+- **`Stint`:** all lap and tyre fields
+- **`RaceControl`:** `driver_number`, `flag`, `lap_number` and `scope`
+- **Others:** `CarData.drs`, `Driver.country_code`, `Pit.pit_duration` and `StartingGrid.lap_duration`
 
 ## Migrating from 0.1.x
+
+If you're going straight from 0.1.x to 1.0, also read [Upgrading to 1.0](#upgrading-to-10) for the nullable types.
 
 0.2 is backwards compatible: the `getX()` methods still work, so you can migrate one call at a time. They are marked `@deprecated` in favour of the new API.
 
@@ -217,6 +235,15 @@ What changed in 0.2:
 - **axios is no longer a dependency.**
 - **Legacy method return types are narrower.** In JSON mode they return `T[]` instead of `T[] | string`, and in CSV mode they return `string`. Existing code that narrows the union still compiles.
 - **Legacy methods still throw on "No results found"** (404), as before. The new `list()` returns `[]` instead.
+
+## Versioning
+
+This package follows [semver](https://semver.org).
+
+- **Stable from 1.0:** everything exported from `openf1-js` and every documented method and option.
+- **Kept for all of 1.x:** the legacy `getX()` methods and the `mode` option. They are deprecated but won't be removed before 2.0.
+- **Minor releases** can add endpoints, fields and options. They can also make a field optional or nullable when OpenF1 changes its data, because that reflects what the API actually returns.
+- **Fields OpenF1 removes,** such as `pit_duration` and `Driver.country_code` at the end of 2026, are marked `@deprecated` first. Removing them from the types waits for a major release.
 
 ## Contributing
 
