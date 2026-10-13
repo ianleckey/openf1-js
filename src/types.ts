@@ -1,23 +1,259 @@
-export interface TeamRadio {
+// Response types for each OpenF1 endpoint.
+// Field reference: https://openf1.org/docs
+
+/** Car telemetry sampled at roughly 3.7 Hz. */
+export interface CarData {
+  /** Whether the brake pedal is pressed (100) or not (0). */
+  brake: number;
+  /** UTC date and time, ISO 8601. */
   date: string;
   driver_number: number;
+  /**
+   * DRS status: 0/1 off, 8 detected (eligible in activation zone), 10/12/14 on. `null` from 2026 onwards, when DRS was removed from the regulations.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  drs: number;
   meeting_key: number;
-  recording_url: string;
+  /** Current gear, 1-8. 0 is neutral or no gear engaged. */
+  n_gear: number;
+  /** Engine revolutions per minute. */
+  rpm: number;
+  session_key: number;
+  /** Speed in km/h. */
+  speed: number;
+  /** Throttle pedal position, 0-100 %. */
+  throttle: number;
+}
+
+/** Championship standings for drivers, before and after a race. Beta, race sessions only. */
+export interface ChampionshipDriver {
+  driver_number: number;
+  meeting_key: number;
+  /** Points after the session. */
+  points_current: number;
+  /** Points before the session. */
+  points_start: number;
+  /** Championship position after the session. */
+  position_current: number;
+  /** Championship position before the session. */
+  position_start: number;
   session_key: number;
 }
 
-export interface Weather {
-  air_temperature: number;
-  date: string;
-  humidity: number;
+/** Championship standings for teams, before and after a race. Beta, race sessions only. */
+export interface ChampionshipTeam {
   meeting_key: number;
-  pressure: number;
-  rainfall: number;
+  points_current: number;
+  points_start: number;
+  position_current: number;
+  position_start: number;
   session_key: number;
-  track_temperature: number;
-  wind_direction: number;
-  wind_speed: number;
+  team_name: string;
 }
+
+/** Driver information for a session. */
+export interface Driver {
+  /** Name as shown on TV graphics, e.g. "M VERSTAPPEN". */
+  broadcast_name: string;
+  /**
+   * @deprecated Slated for removal by OpenF1 at the end of 2026; often `null` already.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  country_code: string;
+  driver_number: number;
+  first_name: string;
+  full_name: string;
+  /** URL of the driver's face photo. */
+  headshot_url: string;
+  last_name: string;
+  meeting_key: number;
+  /** Three-letter acronym, e.g. "VER". */
+  name_acronym: string;
+  session_key: number;
+  /** Team colour as a hex RGB string without the leading `#`, e.g. "3671C6". */
+  team_colour: string;
+  team_name: string;
+}
+
+/** Gaps between drivers, updated about every 4 seconds. Race sessions only. */
+export interface Interval {
+  date: string;
+  driver_number: number;
+  /** Seconds to the race leader, "+1 LAP"-style string when lapped, or `null` for the leader. */
+  gap_to_leader: number | string | null;
+  /** Seconds to the car ahead, "+1 LAP"-style string when lapped, or `null` for the leader. */
+  interval: number | string | null;
+  meeting_key: number;
+  session_key: number;
+}
+
+/** Detailed information about a single lap. */
+export interface Lap {
+  /**
+   * Approximate UTC start time of the lap, ISO 8601.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  date_start: string;
+  driver_number: number;
+  /**
+   * Sector 1 time in seconds.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  duration_sector_1: number;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
+  duration_sector_2: number;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
+  duration_sector_3: number;
+  /**
+   * Speed (km/h) at the first intermediate point.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  i1_speed: number;
+  /**
+   * Speed (km/h) at the second intermediate point.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  i2_speed: number;
+  /** Whether this is the lap out of the pits. */
+  is_pit_out_lap: boolean;
+  /**
+   * Total lap time in seconds.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  lap_duration: number;
+  lap_number: number;
+  meeting_key: number;
+  /**
+   * Mini-sector colour codes for sector 1. Not available during races. Cannot be filtered.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  segments_sector_1: number[];
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
+  segments_sector_2: number[];
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
+  segments_sector_3: number[];
+  session_key: number;
+  /**
+   * Speed (km/h) at the speed trap.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  st_speed: number;
+}
+
+/** Approximate car position on the circuit, sampled at roughly 3.7 Hz. */
+export interface Location {
+  date: string;
+  driver_number: number;
+  meeting_key: number;
+  session_key: number;
+  /** Cartesian coordinates. Do not include lateral position on track. */
+  x: number;
+  y: number;
+  z: number;
+}
+
+/** A Grand Prix or testing weekend. */
+export interface Meeting {
+  circuit_image?: string;
+  circuit_info_url?: string;
+  circuit_key: number;
+  circuit_short_name: string;
+  circuit_type?: string;
+  country_code: string;
+  country_flag?: string;
+  country_key: number;
+  country_name: string;
+  date_end?: string;
+  date_start: string;
+  /** Offset from UTC, e.g. "08:00:00". */
+  gmt_offset: string;
+  is_cancelled?: boolean;
+  location: string;
+  meeting_key: number;
+  meeting_name: string;
+  meeting_official_name: string;
+  year: number;
+}
+
+/** An on-track overtake. Race sessions only; may be incomplete. */
+export interface Overtake {
+  date: string;
+  meeting_key: number;
+  overtaken_driver_number: number;
+  overtaking_driver_number: number;
+  /** Position gained by the overtaking driver. */
+  position: number;
+  session_key: number;
+}
+
+/** A pit lane visit. */
+export interface Pit {
+  date: string;
+  driver_number: number;
+  /** Time spent in the pit lane, entry to exit, in seconds. */
+  lane_duration?: number | null;
+  lap_number: number;
+  meeting_key: number;
+  /**
+   * @deprecated Use `lane_duration`. Slated for removal by OpenF1 at the end of 2026.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  pit_duration: number;
+  session_key: number;
+  /** Stationary time in seconds. Only available from the 2024 US GP onwards. */
+  stop_duration?: number | null;
+}
+
+/** Driver positions throughout a session. */
+export interface Position {
+  date: string;
+  driver_number: number;
+  meeting_key: number;
+  position: number;
+  session_key: number;
+}
+
+/** Race control messages: flags, incidents, safety car, etc. */
+export interface RaceControl {
+  /** e.g. "Flag", "SafetyCar", "Drs", "CarEvent", "Other". */
+  category: string;
+  date: string;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
+  driver_number: number;
+  /**
+   * e.g. "GREEN", "YELLOW", "DOUBLE YELLOW", "CHEQUERED", "BLACK AND WHITE".
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  flag: string;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
+  lap_number: number;
+  meeting_key: number;
+  message: string;
+  /** Qualifying part (1, 2 or 3) when relevant. */
+  qualifying_phase?: number | null;
+  /**
+   * "Track", "Driver" or "Sector".
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
+  scope: string;
+  /** Mini-sector the message refers to, when `scope` is "Sector". */
+  sector: number | null;
+  session_key: number;
+}
+
+/** A session (practice, qualifying, sprint, race) within a meeting. */
 export interface Session {
   circuit_key: number;
   circuit_short_name: string;
@@ -27,152 +263,134 @@ export interface Session {
   date_end: string;
   date_start: string;
   gmt_offset: string;
+  is_cancelled?: boolean;
   location: string;
   meeting_key: number;
   session_key: number;
+  /** e.g. "Practice 1", "Qualifying", "Sprint", "Race". */
   session_name: string;
+  /** e.g. "Practice", "Qualifying", "Race". */
   session_type: string;
   year: number;
 }
 
+/** Final classification of a session. */
 export interface SessionResult {
   dnf: boolean;
   dns: boolean;
   dsq: boolean;
   driver_number: number;
+  /**
+   * Total race time, or best lap time per qualifying part (`[Q1, Q2, Q3]`), in seconds.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
   duration: number | number[];
+  /**
+   * Gap to the winner/pole in seconds, a "+N LAP(S)" string, or per qualifying part.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
   gap_to_leader: number | string | number[];
-  number_of_laps: number;
   meeting_key: number;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
+  number_of_laps: number;
+  /** Championship points scored in this session. */
+  points?: number | null;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
   position: number;
   session_key: number;
 }
 
+/** Starting grid for a race. */
 export interface StartingGrid {
-  position: number;
   driver_number: number;
+  /**
+   * Qualifying lap time in seconds.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
   lap_duration: number;
   meeting_key: number;
+  position: number;
   session_key: number;
 }
 
+/** A stint: a run of consecutive laps on one set of tyres. */
 export interface Stint {
+  /**
+   * e.g. "SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET".
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
   compound: string;
   driver_number: number;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
   lap_end: number;
+  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
   lap_start: number;
   meeting_key: number;
   session_key: number;
   stint_number: number;
+  /**
+   * Tyre age in laps at the start of the stint.
+   *
+   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
+   */
   tyre_age_at_start: number;
 }
-export interface Meeting {
-  circuit_key: number;
-  circuit_short_name: string;
-  country_code: string;
-  country_key: number;
-  country_name: string;
-  date_start: string;
-  gmt_offset: string;
-  location: string;
-  meeting_key: number;
-  meeting_name: string;
-  meeting_official_name: string;
-  year: number;
-}
 
-export interface Pit {
-  date: string;
-  driver_number: number;
-  lap_number: number;
-  meeting_key: number;
-  pit_duration: number;
-  session_key: number;
-}
-
-export interface Position {
+/** A team radio recording. Only a selection of exchanges is published. */
+export interface TeamRadio {
   date: string;
   driver_number: number;
   meeting_key: number;
-  position: number;
+  /** URL of the MP3 recording. */
+  recording_url: string;
   session_key: number;
 }
 
-export interface RaceControl {
-  category: string;
+/** Track weather, updated every minute. */
+export interface Weather {
+  /** Air temperature in °C. */
+  air_temperature: number;
   date: string;
-  driver_number: number;
-  flag: string;
-  lap_number: number;
+  /** Relative humidity, %. */
+  humidity: number;
   meeting_key: number;
-  message: string;
-  scope: string;
-  sector: number | null;
+  /** Air pressure in mbar. */
+  pressure: number;
+  /** Whether there is rainfall (1) or not (0). */
+  rainfall: number;
   session_key: number;
-}
-export interface Location {
-  date: string; // ISO 8601
-  driver_number: number;
-  meeting_key: number;
-  session_key: number;
-  x: number;
-  y: number;
-  z: number;
+  /** Track temperature in °C. */
+  track_temperature: number;
+  /** Wind direction in degrees, 0-359. */
+  wind_direction: number;
+  /** Wind speed in m/s. */
+  wind_speed: number;
 }
 
-// Types and interfaces for OpenF1 SDK
-export interface Lap {
-  date_start: string; // ISO 8601
-  driver_number: number;
-  duration_sector_1: number;
-  duration_sector_2: number;
-  duration_sector_3: number;
-  i1_speed: number;
-  i2_speed: number;
-  is_pit_out_lap: boolean;
-  lap_duration: number;
-  lap_number: number;
-  meeting_key: number;
-  segments_sector_1: number[];
-  segments_sector_2: number[];
-  segments_sector_3: number[];
-  session_key: number;
-  st_speed: number;
+/** Maps each OpenF1 endpoint path to its record type. */
+export interface Endpoints {
+  car_data: CarData;
+  championship_drivers: ChampionshipDriver;
+  championship_teams: ChampionshipTeam;
+  drivers: Driver;
+  intervals: Interval;
+  laps: Lap;
+  location: Location;
+  meetings: Meeting;
+  overtakes: Overtake;
+  pit: Pit;
+  position: Position;
+  race_control: RaceControl;
+  session_result: SessionResult;
+  sessions: Session;
+  starting_grid: StartingGrid;
+  stints: Stint;
+  team_radio: TeamRadio;
+  weather: Weather;
 }
 
-export interface CarData {
-  brake: number; // 0 or 100
-  date: string; // ISO 8601
-  driver_number: number;
-  drs: number;
-  meeting_key: number;
-  n_gear: number;
-  rpm: number;
-  session_key: number;
-  speed: number;
-  throttle: number;
-}
-
-export interface Driver {
-  broadcast_name: string;
-  country_code: string;
-  driver_number: number;
-  first_name: string;
-  full_name: string;
-  headshot_url: string;
-  last_name: string;
-  meeting_key: number;
-  name_acronym: string;
-  session_key: number;
-  team_colour: string;
-  team_name: string;
-}
-
-export interface Interval {
-  date: string; // ISO 8601
-  driver_number: number;
-  gap_to_leader: number | string | null; // seconds, "+1 LAP", or null
-  interval: number | string | null; // seconds, "+1 LAP", or null
-  meeting_key: number;
-  session_key: number;
-}
+export type Endpoint = keyof Endpoints;

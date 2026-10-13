@@ -2,384 +2,233 @@
 
 ![CI](https://github.com/ianleckey/openf1-js/actions/workflows/ci.yml/badge.svg)
 ![Publish](https://github.com/ianleckey/openf1-js/actions/workflows/publish.yml/badge.svg)
+[![npm](https://img.shields.io/npm/v/openf1-js)](https://www.npmjs.com/package/openf1-js)
 
-JavaScript SDK for the [OpenF1 API](https://openf1.org/#api-endpoints).
+A typed JavaScript/TypeScript client for the [OpenF1 API](https://openf1.org): real-time and historical Formula 1 data (lap times, telemetry, positions, pit stops, team radio, weather and more).
 
-npm install openf1-js
-
-## Installation
+- **Typed queries and results.** You get autocomplete for every field and filter, and results come back typed as `Lap[]` and so on.
+- **Zero dependencies.** It uses the native `fetch`, so it runs in Node 18+, browsers, Deno, Bun and edge runtimes.
+- **ESM and CommonJS** builds are both included.
 
 ```bash
 npm install openf1-js
 ```
 
-## Basic Usage
+## Quick start
 
-```js
+```ts
 import { OpenF1 } from "openf1-js";
 
-// Create an API client (default: JSON mode)
-const api = new OpenF1();
+const f1 = new OpenF1();
 
-// Use CSV mode globally
-const apiCsv = new OpenF1({ mode: "csv" });
-// All endpoint methods support CSV mode, e.g.:
-const csvData = await apiCsv.getCarData({ session_key: 1234 }); // returns CSV string
+const laps = await f1.laps.list({ session_key: 9161, driver_number: 1 });
+console.log(laps[0].lap_duration); // lap time in seconds
 ```
 
-## Global Options
+Every endpoint is a property of the client, with a `list()` method that returns an array of JSON records. CommonJS works too: `const { OpenF1 } = require("openf1-js")`.
 
-The `OpenF1` constructor accepts an options object:
+## Querying and filters
 
-| Option  | Type            | Default                    | Description                       |
-| ------- | --------------- | -------------------------- | --------------------------------- |
-| baseURL | string          | https://api.openf1.org/v1/ | Override API base URL             |
-| mode    | 'json' \| 'csv' | 'json'                     | Response format for all endpoints |
+Pass a query object to `list()`. Each key is a field of the record you're fetching, and TypeScript checks both the names and the value types.
 
-## Endpoint Methods & Parameters
+```ts
+// Equality
+await f1.drivers.list({ session_key: 9158, driver_number: 1 });
 
-All endpoint methods accept an optional `params` object, which is passed as query parameters to the API. See the [OpenF1 API docs](https://openf1.org/#api-endpoints) for full parameter details. Here are some examples:
+// Several values: matches any of them
+await f1.drivers.list({ session_key: 9158, driver_number: [1, 44, 81] });
 
-```js
-// Car data for a specific driver/session, with a filter
-await api.getCarData({ driver_number: 55, session_key: 9159, speed: ">=315" });
+// Comparisons: gt, gte, lt, lte
+await f1.carData.list({ session_key: 9159, driver_number: 55, speed: { gte: 315 } });
 
-// Drivers in a session
-await api.getDrivers({ driver_number: 1, session_key: 9158 });
+// Ranges: combine operators
+await f1.intervals.list({ session_key: 9165, interval: { gt: 0, lt: 0.005 } });
 
-// Intervals with a filter
-await api.getIntervals({ session_key: 9165, interval: "<0.005" });
-
-// Location data in a time window
-await api.getLocation({
+// Dates: ISO strings or Date objects
+await f1.location.list({
   session_key: 9161,
   driver_number: 81,
-  date: ">2023-09-16T13:03:35.200",
-  date2: "<2023-09-16T13:03:35.800",
+  date: { gt: "2023-09-16T13:03:35.200", lt: new Date("2023-09-16T13:03:35.800Z") },
 });
 
-// Meetings by year/country
-await api.getMeetings({ year: 2023, country_name: "Singapore" });
+// "latest": the current or most recent session/meeting
+await f1.weather.list({ meeting_key: "latest" });
+```
 
-// Pit stops with duration filter
-await api.getPit({ session_key: 9158, pit_duration: "<31" });
+If nothing matches, `list()` returns `[]`.
 
-// Position for a driver in a meeting
-await api.getPosition({
-  meeting_key: 1217,
-  driver_number: 40,
-  position: "<=3",
-});
+## Session scope
 
-// Race control messages
-await api.getRaceControl({
-  flag: "BLACK AND WHITE",
-  driver_number: 1,
-  date: ">=2023-01-01",
-  date2: "<2023-09-01",
-});
+Most F1 questions are about one session. `f1.session(key)` returns an object whose methods are already filtered to that session:
 
-// Sessions by country, name, and year
-await api.getSessions({
-  country_name: "Belgium",
-  session_name: "Sprint",
-  year: 2023,
-});
+```ts
+const race = f1.session("latest"); // or a session key, e.g. f1.session(9158)
 
-// Session results for top 3
-await api.getSessionResult({ session_key: 7782, position: "<=3" });
+const info    = await race.info();                            // Session | undefined
+const drivers = await race.drivers();
+const stints  = await race.stints({ driver_number: 1 });
+const radio   = await race.teamRadio({ driver_number: [1, 44] });
+const yellows = await race.raceControl({ flag: "YELLOW" });
+```
 
-// Starting grid for a session
-await api.getStartingGrid({ session_key: 7783, position: "<=3" });
+Each method takes the same query object as `list()`, except `session_key`, which the scope sets.
 
-// Stints with tyre age filter
-await api.getStints({ session_key: 9165, tyre_age_at_start: ">=3" });
+## Endpoints
 
-// Team radio for a driver/session
-await api.getTeamRadio({ session_key: 9158, driver_number: 11 });
+| Property | OpenF1 endpoint | Notes |
+| --- | --- | --- |
+| `f1.carData` | [`/car_data`](https://openf1.org/docs/#car-data) | Speed, throttle, brake, gear, RPM, DRS at ~3.7 Hz. Filter by driver and time; responses are large. |
+| `f1.championshipDrivers` | [`/championship_drivers`](https://openf1.org/docs/#drivers-championship-beta) | Beta. Races only. |
+| `f1.championshipTeams` | [`/championship_teams`](https://openf1.org/docs/#teams-championship-beta) | Beta. Races only. |
+| `f1.drivers` | [`/drivers`](https://openf1.org/docs/#drivers) | Names, teams, team colours, headshots. |
+| `f1.intervals` | [`/intervals`](https://openf1.org/docs/#intervals) | Gaps to leader and car ahead, ~every 4 s. Races only. |
+| `f1.laps` | [`/laps`](https://openf1.org/docs/#laps) | Lap and sector times, speed traps. |
+| `f1.location` | [`/location`](https://openf1.org/docs/#location) | Car x/y/z on track at ~3.7 Hz. |
+| `f1.meetings` | [`/meetings`](https://openf1.org/docs/#meetings) | Grand Prix and testing weekends. |
+| `f1.overtakes` | [`/overtakes`](https://openf1.org/docs/#overtakes) | Races only; may be incomplete. |
+| `f1.pit` | [`/pit`](https://openf1.org/docs/#pit) | Pit lane and stop durations. |
+| `f1.position` | [`/position`](https://openf1.org/docs/#position) | Position changes over a session. |
+| `f1.raceControl` | [`/race_control`](https://openf1.org/docs/#race-control) | Flags, safety car, incidents. |
+| `f1.sessions` | [`/sessions`](https://openf1.org/docs/#sessions) | Practice, qualifying, sprint, race. |
+| `f1.sessionResult` | [`/session_result`](https://openf1.org/docs/#session-result) | Final classification. |
+| `f1.startingGrid` | [`/starting_grid`](https://openf1.org/docs/#starting-grid) | Race starting grid. |
+| `f1.stints` | [`/stints`](https://openf1.org/docs/#stints) | Tyre compounds and stint laps. |
+| `f1.teamRadio` | [`/team_radio`](https://openf1.org/docs/#team-radio) | Links to radio recordings (a selection only). |
+| `f1.weather` | [`/weather`](https://openf1.org/docs/#weather) | Track weather, every minute. |
 
-// Weather with filters
-await api.getWeather({
-  meeting_key: 1208,
-  wind_direction: ">=130",
-  track_temperature: ">=52",
+Field-by-field descriptions are in the exported types (`Lap`, `CarData` and so on) and show up in your editor on hover. OpenF1's [documentation](https://openf1.org/docs) is the source of truth.
+
+For an endpoint this package doesn't wrap yet, use `request()`:
+
+```ts
+const rows = await f1.request<MyType>("some_new_endpoint", { session_key: 9158 });
+```
+
+## CSV
+
+Responses are JSON unless you ask for CSV. To get a CSV string instead, call `.csv()`:
+
+```ts
+const csv = await f1.laps.csv({ session_key: 9161, driver_number: 1 }); // string
+```
+
+## Options
+
+```ts
+const f1 = new OpenF1({
+  timeoutMs: 10_000,
+  retries: 3,
 });
 ```
 
-## Endpoint Attributes & Parameters
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `baseURL` | `string` | `https://api.openf1.org/v1/` | API base URL. |
+| `timeoutMs` | `number` | `30000` | Per-request timeout. |
+| `retries` | `number` | `2` | Retries after a `429 Too Many Requests` response. Honours `Retry-After`. |
+| `headers` | `Record<string, string>` | `{}` | Extra headers for every request. |
+| `accessToken` | `string \| () => string \| Promise<string>` | | Sponsor-tier token; see below. |
+| `fetch` | `typeof fetch` | global `fetch` | Custom fetch, e.g. for proxies, caching or tests. |
+| `mode` | `"json" \| "csv"` | `"json"` | Only affects the legacy `getX()` methods. |
 
-Below are the request parameters (query params) and response attributes for each endpoint, based on the OpenF1 API and SDK types.
+Every `list()`, `csv()` and session method also takes `{ signal }` as a second argument to support cancellation:
 
-### Car Data (`getCarData`)
-
-| Name          | Type   | Description                                                                                    |
-| ------------- | ------ | ---------------------------------------------------------------------------------------------- |
-| brake         | number | 0 or 100                                                                                       |
-| date          | string | ISO 8601                                                                                       |
-| driver_number | number |                                                                                                |
-| drs           | number | The Drag Reduction System (DRS) status (see mapping table below).                              |
-| meeting_key   | number | The unique identifier for the meeting. Use `latest` to identify the latest or current meeting. |
-| n_gear        | number | 0-8. 0 indicates neutral or no gear engaged                                                    |
-| rpm           | number |                                                                                                |
-| session_key   | number |                                                                                                |
-| speed         | number | km/h                                                                                           |
-| throttle      | number | %                                                                                              |
-
-| DRS value | Interpretation                             |
-| --------- | ------------------------------------------ |
-| 0         | DRS off                                    |
-| 1         | DRS off                                    |
-| 2         | ?                                          |
-| 3         | ?                                          |
-| 8         | Detected, eligible once in activation zone |
-| 9         | ?                                          |
-| 10        | DRS on                                     |
-| 12        | DRS on                                     |
-| 14        | DRS on                                     |
-
-**Request params:** Any of the above fields can be used as a query param (e.g. `driver_number`, `session_key`, `speed`, etc). Filters like `>=`, `<=` are supported for numeric fields.
-
-### Drivers (`getDrivers`)
-
-| Name           | Type   | Description |
-| -------------- | ------ | ----------- |
-| broadcast_name | string |             |
-| country_code   | string |             |
-| driver_number  | number |             |
-| first_name     | string |             |
-| full_name      | string |             |
-| headshot_url   | string |             |
-| last_name      | string |             |
-| meeting_key    | number |             |
-| name_acronym   | string |             |
-| session_key    | number |             |
-| team_colour    | string |             |
-| team_name      | string |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Intervals (`getIntervals`)
-
-| Name          | Type                 | Description                |
-| ------------- | -------------------- | -------------------------- |
-| date          | string               | ISO 8601                   |
-| driver_number | number               |                            |
-| gap_to_leader | number\|string\|null | seconds, '+1 LAP', or null |
-| interval      | number\|string\|null | seconds, '+1 LAP', or null |
-| meeting_key   | number               |                            |
-| session_key   | number               |                            |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Location (`getLocation`)
-
-| Name          | Type   | Description |
-| ------------- | ------ | ----------- |
-| date          | string | ISO 8601    |
-| driver_number | number |             |
-| meeting_key   | number |             |
-| session_key   | number |             |
-| x             | number |             |
-| y             | number |             |
-| z             | number |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Meetings (`getMeetings`)
-
-| Name                  | Type   | Description |
-| --------------------- | ------ | ----------- |
-| circuit_key           | number |             |
-| circuit_short_name    | string |             |
-| country_code          | string |             |
-| country_key           | number |             |
-| country_name          | string |             |
-| date_start            | string |             |
-| gmt_offset            | string |             |
-| location              | string |             |
-| meeting_key           | number |             |
-| meeting_name          | string |             |
-| meeting_official_name | string |             |
-| year                  | number |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Pit (`getPit`)
-
-| Name          | Type   | Description |
-| ------------- | ------ | ----------- |
-| date          | string |             |
-| driver_number | number |             |
-| lap_number    | number |             |
-| meeting_key   | number |             |
-| pit_duration  | number |             |
-| session_key   | number |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Position (`getPosition`)
-
-| Name          | Type   | Description |
-| ------------- | ------ | ----------- |
-| date          | string |             |
-| driver_number | number |             |
-| meeting_key   | number |             |
-| position      | number |             |
-| session_key   | number |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Race Control (`getRaceControl`)
-
-| Name          | Type         | Description |
-| ------------- | ------------ | ----------- |
-| category      | string       |             |
-| date          | string       |             |
-| driver_number | number       |             |
-| flag          | string       |             |
-| lap_number    | number       |             |
-| meeting_key   | number       |             |
-| message       | string       |             |
-| scope         | string       |             |
-| sector        | number\|null |             |
-| session_key   | number       |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Sessions (`getSessions`)
-
-| Name               | Type   | Description |
-| ------------------ | ------ | ----------- |
-| circuit_key        | number |             |
-| circuit_short_name | string |             |
-| country_code       | string |             |
-| country_key        | number |             |
-| country_name       | string |             |
-| date_end           | string |             |
-| date_start         | string |             |
-| gmt_offset         | string |             |
-| location           | string |             |
-| meeting_key        | number |             |
-| session_key        | number |             |
-| session_name       | string |             |
-| session_type       | string |             |
-| year               | number |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Session Result (`getSessionResult`)
-
-| Name           | Type                     | Description |
-| -------------- | ------------------------ | ----------- |
-| dnf            | boolean                  |             |
-| dns            | boolean                  |             |
-| dsq            | boolean                  |             |
-| driver_number  | number                   |             |
-| duration       | number\|number[]         |             |
-| gap_to_leader  | number\|string\|number[] |             |
-| number_of_laps | number                   |             |
-| meeting_key    | number                   |             |
-| position       | number                   |             |
-| session_key    | number                   |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Starting Grid (`getStartingGrid`)
-
-| Name          | Type   | Description |
-| ------------- | ------ | ----------- |
-| position      | number |             |
-| driver_number | number |             |
-| lap_duration  | number |             |
-| meeting_key   | number |             |
-| session_key   | number |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Stints (`getStints`)
-
-| Name              | Type   | Description |
-| ----------------- | ------ | ----------- |
-| compound          | string |             |
-| driver_number     | number |             |
-| lap_end           | number |             |
-| lap_start         | number |             |
-| meeting_key       | number |             |
-| session_key       | number |             |
-| stint_number      | number |             |
-| tyre_age_at_start | number |             |
-
-**Request params:** Any of the above fields can be used as a query param.
-
-### Team Radio (`getTeamRadio`)
-
-Provides a collection of radio exchanges between Formula 1 drivers and their respective teams during sessions. Only a limited selection of communications are included.
-
-| Name          | Type   | Description                                 |
-| ------------- | ------ | ------------------------------------------- |
-| date          | string | The UTC date and time, in ISO 8601 format.  |
-| driver_number | number | The unique number assigned to an F1 driver. |
-| meeting_key   | number | The unique identifier for the meeting.      |
-| recording_url | string | URL of the radio recording.                 |
-| session_key   | number | The unique identifier for the session.      |
-
-**Request params:** Any of the above fields can be used as a query param (e.g. `session_key`, `driver_number`).
-
-**Sample response:**
-
+```ts
+const controller = new AbortController();
+await f1.carData.list({ session_key: 9159 }, { signal: controller.signal });
 ```
-[
-  {
-    "date": "2023-09-15T09:40:43.005000",
-    "driver_number": 11,
-    "meeting_key": 1219,
-    "recording_url": "https://livetiming.formula1.com/static/2023/2023-09-17_Singapore_Grand_Prix/2023-09-15_Practice_1/TeamRadio/SERPER01_11_20230915_104008.mp3",
-    "session_key": 9158
+
+## Errors and rate limits
+
+Failed requests throw an `OpenF1Error` with `status`, `url` and `body`:
+
+```ts
+import { OpenF1Error } from "openf1-js";
+
+try {
+  await f1.laps.list({ session_key: 9161 });
+} catch (error) {
+  if (error instanceof OpenF1Error) {
+    console.error(error.status, error.message);
+  }
+}
+```
+
+The free tier allows 3 requests per second and 30 per minute. A `429` is retried automatically (see `retries`). If you make many calls in a loop, space them out.
+
+## Live data (sponsor tier)
+
+Historical data needs no account. Real-time data requires an [OpenF1 sponsor account](https://openf1.org/auth.html). Exchange your credentials for a token **on a server**, never in browser code:
+
+```ts
+const { accessToken, expiresAt } = await OpenF1.fetchToken({
+  username: process.env.OPENF1_USERNAME!,
+  password: process.env.OPENF1_PASSWORD!,
+});
+
+const f1 = new OpenF1({ accessToken });
+```
+
+Tokens last one hour. To refresh automatically, pass a function:
+
+```ts
+let token: { accessToken: string; expiresAt: Date } | undefined;
+
+const f1 = new OpenF1({
+  accessToken: async () => {
+    if (!token || token.expiresAt.getTime() - Date.now() < 60_000) {
+      token = await OpenF1.fetchToken({ username, password });
+    }
+    return token.accessToken;
   },
-  {
-    "date": "2023-09-15T10:32:47.325000",
-    "driver_number": 11,
-    "meeting_key": 1219,
-    "recording_url": "https://livetiming.formula1.com/static/2023/2023-09-17_Singapore_Grand_Prix/2023-09-15_Practice_1/TeamRadio/SERPER01_11_20230915_113201.mp3",
-    "session_key": 9158
-  }
-]
+});
 ```
 
-### Weather (`getWeather`)
+## TypeScript
 
-The weather over the track, updated every minute.
+All record types are exported, along with `Query<T>` for building queries ahead of time:
 
-| Name              | Type   | Description                                |
-| ----------------- | ------ | ------------------------------------------ |
-| air_temperature   | number | Air temperature (°C).                      |
-| date              | string | The UTC date and time, in ISO 8601 format. |
-| humidity          | number | Relative humidity (%).                     |
-| meeting_key       | number | The unique identifier for the meeting.     |
-| pressure          | number | Air pressure (mbar).                       |
-| rainfall          | number | Whether there is rainfall.                 |
-| session_key       | number | The unique identifier for the session.     |
-| track_temperature | number | Track temperature (°C).                    |
-| wind_direction    | number | Wind direction (°), from 0° to 359°.       |
-| wind_speed        | number | Wind speed (m/s).                          |
+```ts
+import type { Lap, Query } from "openf1-js";
 
-**Request params:** Any of the above fields can be used as a query param (e.g. `meeting_key`, `wind_direction`, `track_temperature`).
-
-**Sample response:**
-
+const fastLaps: Query<Lap> = { session_key: 9161, lap_duration: { lt: 100 } };
+const laps: Lap[] = await f1.laps.list(fastLaps);
 ```
-[
-  {
-    "air_temperature": 27.8,
-    "date": "2023-05-07T18:42:25.233000+00:00",
-    "humidity": 58,
-    "meeting_key": 1208,
-    "pressure": 1018.7,
-    "rainfall": 0,
-    "session_key": 9078,
-    "track_temperature": 52.5,
-    "wind_direction": 136,
-    "wind_speed": 2.4
-  }
-]
+
+Some fields can be `null` at runtime even though they are typed as non-null, for example `lap_duration` on an out-lap or `drs` from 2026 onwards. This keeps 0.1.x code compiling. Those fields are flagged in their hover docs, and 1.0 will make the types nullable.
+
+## Migrating from 0.1.x
+
+0.2 is backwards compatible: the `getX()` methods still work, so you can migrate one call at a time. They are marked `@deprecated` in favour of the new API.
+
+| 0.1.x | 0.2 |
+| --- | --- |
+| `api.getLaps({ session_key: 1 })` | `f1.laps.list({ session_key: 1 })` |
+| `api.getCarData({ speed: ">=315" })` | `f1.carData.list({ speed: { gte: 315 } })` |
+| `{ date: ">2023-01-01", date2: "<2023-02-01" }` | `{ date: { gt: "2023-01-01", lt: "2023-02-01" } }` |
+| `new OpenF1({ mode: "csv" }).getLaps(q)` | `f1.laps.csv(q)` |
+| return type `Lap[] \| string` | `Lap[]` from `list()`, `string` from `csv()` |
+| `getSessionResult`, `getStartingGrid`, … | `sessionResult`, `startingGrid`, … (camelCase, no `get`) |
+
+What changed in 0.2:
+
+- **Filters in 0.1.x didn't work.** Values like `speed: ">=315"` were sent as `speed=%3E%3D315`, which OpenF1 reads as "speed equals `>=315`". The legacy methods now translate them into the correct `speed>=315`, so those calls start returning data.
+- **Errors are now `OpenF1Error`** instead of axios's `AxiosError`. `status` is available directly on the error, where it used to be `error.response.status`.
+- **axios is no longer a dependency.**
+- **Legacy method return types are narrower.** In JSON mode they return `T[]` instead of `T[] | string`, and in CSV mode they return `string`. Existing code that narrows the union still compiles.
+- **Legacy methods still throw on "No results found"** (404), as before. The new `list()` returns `[]` instead.
+
+## Contributing
+
+```bash
+npm install
+npm test           # unit tests (nock-mocked)
+npm run typecheck  # source plus compile-time API checks in test/types.check.ts
+npm run build      # ESM + CJS + .d.ts into dist/
 ```
+
+Issues and PRs are welcome at [github.com/ianleckey/openf1-js](https://github.com/ianleckey/openf1-js).
+
+## License
+
+MIT. Not affiliated with Formula 1 or OpenF1; data provided by [OpenF1](https://openf1.org).

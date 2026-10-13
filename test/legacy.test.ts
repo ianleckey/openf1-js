@@ -1,6 +1,10 @@
 import { OpenF1 } from "../src/index";
 import nock from "nock";
 
+// Legacy 0.1.x API. These assert the exact query string sent, with operators in the key
+// (`speed>=315`) as OpenF1 expects.
+const at = (expected: string) => (uri: string) => decodeURIComponent(uri) === expected;
+
 describe("OpenF1 SDK Endpoints", () => {
   const sdk = new OpenF1();
 
@@ -38,8 +42,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/sessions")
-      .query({ country_name: "Belgium", session_name: "Sprint", year: 2023 })
+      .get(at("/v1/sessions?country_name=Belgium&session_name=Sprint&year=2023"))
       .reply(200, expected);
     const res = await sdk.getSessions({
       country_name: "Belgium",
@@ -89,8 +92,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/session_result")
-      .query({ session_key: 7782, position: "<=3" })
+      .get(at("/v1/session_result?session_key=7782&position<=3"))
       .reply(200, expected);
     const res = await sdk.getSessionResult({
       session_key: 7782,
@@ -124,8 +126,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/starting_grid")
-      .query({ session_key: 7783, position: "<=3" })
+      .get(at("/v1/starting_grid?session_key=7783&position<=3"))
       .reply(200, expected);
     const res = await sdk.getStartingGrid({
       session_key: 7783,
@@ -158,8 +159,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/stints")
-      .query({ session_key: 9165, tyre_age_at_start: ">=3" })
+      .get(at("/v1/stints?session_key=9165&tyre_age_at_start>=3"))
       .reply(200, expected);
     const res = await sdk.getStints({
       session_key: 9165,
@@ -187,8 +187,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/meetings")
-      .query({ year: 2023, country_name: "Singapore" })
+      .get(at("/v1/meetings?year=2023&country_name=Singapore"))
       .reply(200, expected);
     const res = await sdk.getMeetings({
       year: 2023,
@@ -217,8 +216,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/pit")
-      .query({ session_key: 9158, pit_duration: "<31" })
+      .get(at("/v1/pit?session_key=9158&pit_duration<31"))
       .reply(200, expected);
     const res = await sdk.getPit({ session_key: 9158, pit_duration: "<31" });
     expect(res).toEqual(expected);
@@ -242,8 +240,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/position")
-      .query({ meeting_key: 1217, driver_number: 40, position: "<=3" })
+      .get(at("/v1/position?meeting_key=1217&driver_number=40&position<=3"))
       .reply(200, expected);
     const res = await sdk.getPosition({
       meeting_key: 1217,
@@ -269,13 +266,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/race_control")
-      .query({
-        flag: "BLACK AND WHITE",
-        driver_number: 1,
-        date: ">=2023-01-01",
-        date2: "<2023-09-01",
-      })
+      .get(at("/v1/race_control?flag=BLACK AND WHITE&driver_number=1&date>=2023-01-01&date<2023-09-01"))
       .reply(200, expected);
     const res = await sdk.getRaceControl({
       flag: "BLACK AND WHITE",
@@ -308,13 +299,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/location")
-      .query({
-        session_key: 9161,
-        driver_number: 81,
-        date: ">2023-09-16T13:03:35.200",
-        date2: "<2023-09-16T13:03:35.800",
-      })
+      .get(at("/v1/location?session_key=9161&driver_number=81&date>2023-09-16T13:03:35.200&date<2023-09-16T13:03:35.800"))
       .reply(200, expected);
     const res = await sdk.getLocation({
       session_key: 9161,
@@ -347,8 +332,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/laps")
-      .query({ session_key: 9161, driver_number: 63, lap_number: 8 })
+      .get(at("/v1/laps?session_key=9161&driver_number=63&lap_number=8"))
       .reply(200, expected);
     const res = await sdk.getLaps({
       session_key: 9161,
@@ -386,8 +370,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/car_data")
-      .query({ driver_number: 55, session_key: 9159, speed: ">=315" })
+      .get(at("/v1/car_data?driver_number=55&session_key=9159&speed>=315"))
       .reply(200, expected);
     const res = await sdk.getCarData({
       driver_number: 55,
@@ -416,8 +399,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/drivers")
-      .query({ driver_number: 1, session_key: 9158 })
+      .get(at("/v1/drivers?driver_number=1&session_key=9158"))
       .reply(200, expected);
     const res = await sdk.getDrivers({ driver_number: 1, session_key: 9158 });
     expect(res).toEqual(expected);
@@ -435,8 +417,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/intervals")
-      .query({ session_key: 9165, interval: "<0.005" })
+      .get(at("/v1/intervals?session_key=9165&interval<0.005"))
       .reply(200, expected);
     const res = await sdk.getIntervals({
       session_key: 9165,
@@ -465,8 +446,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/team_radio")
-      .query({ session_key: 9158, driver_number: 11 })
+      .get(at("/v1/team_radio?session_key=9158&driver_number=11"))
       .reply(200, expected);
     const res = await sdk.getTeamRadio({
       session_key: 9158,
@@ -491,12 +471,7 @@ describe("OpenF1 SDK Endpoints", () => {
       },
     ];
     nock(base)
-      .get("/v1/weather")
-      .query({
-        meeting_key: 1208,
-        wind_direction: ">=130",
-        track_temperature: ">=52",
-      })
+      .get(at("/v1/weather?meeting_key=1208&wind_direction>=130&track_temperature>=52"))
       .reply(200, expected);
     const res = await sdk.getWeather({
       meeting_key: 1208,
