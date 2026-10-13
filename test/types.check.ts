@@ -1,5 +1,5 @@
 // Compile-time checks, run by `npm run typecheck`. Nothing here executes.
-import { OpenF1, type Lap, type Session } from "../src/index";
+import { OpenF1, type CarData, type Lap, type Session } from "../src/index";
 
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
   ? true
@@ -12,6 +12,10 @@ async function checks() {
   // New API: JSON by default, CSV opt-in.
   assert<Equal<Awaited<ReturnType<typeof f1.laps.list>>, Lap[]>>();
   assert<Equal<Awaited<ReturnType<typeof f1.laps.csv>>, string>>();
+
+  // Nullable fields are typed as nullable.
+  assert<Equal<Lap["lap_duration"], number | null>>();
+  assert<Equal<CarData["drs"], number | null>>();
 
   // Typed filters.
   await f1.laps.list({ session_key: "latest", driver_number: [1, 44], lap_duration: { lt: 90 } });
@@ -35,6 +39,11 @@ async function checks() {
   // request() overloads.
   assert<Equal<Awaited<ReturnType<typeof f1.request<Lap>>>, Lap[]>>();
   const csv: string = await f1.request("laps", {}, { format: "csv" });
+
+  // Nullable fields can't be filtered with null, but still accept their value type.
+  await f1.laps.list({ lap_duration: { lt: 90 }, st_speed: 300 });
+  // @ts-expect-error null is not a filter value
+  await f1.laps.list({ lap_duration: null });
 
   // Legacy API: JSON mode is now typed precisely, CSV mode as string.
   assert<Equal<Awaited<ReturnType<typeof f1.getLaps>>, Lap[]>>();

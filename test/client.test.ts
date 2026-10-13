@@ -159,3 +159,12 @@ describe("cancellation", () => {
     await expect(pending).rejects.toThrow(/aborted/);
   });
 });
+
+describe("public API", () => {
+  it("has a stable set of runtime exports (changing this is a semver decision)", async () => {
+    const mod = await import("../src/index");
+    expect(Object.keys(mod).sort()).toEqual(
+      ["DEFAULT_BASE_URL", "OpenF1", "OpenF1Error", "isNoResults"].sort()
+    );
+  });
+});

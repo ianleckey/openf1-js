@@ -8,12 +8,8 @@ export interface CarData {
   /** UTC date and time, ISO 8601. */
   date: string;
   driver_number: number;
-  /**
-   * DRS status: 0/1 off, 8 detected (eligible in activation zone), 10/12/14 on. `null` from 2026 onwards, when DRS was removed from the regulations.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  drs: number;
+  /** DRS status: 0/1 off, 8 detected (eligible in activation zone), 10/12/14 on. `null` from 2026 onwards, when DRS was removed from the regulations. */
+  drs: number | null;
   meeting_key: number;
   /** Current gear, 1-8. 0 is neutral or no gear engaged. */
   n_gear: number;
@@ -56,12 +52,8 @@ export interface ChampionshipTeam {
 export interface Driver {
   /** Name as shown on TV graphics, e.g. "M VERSTAPPEN". */
   broadcast_name: string;
-  /**
-   * @deprecated Slated for removal by OpenF1 at the end of 2026; often `null` already.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  country_code: string;
+  /** @deprecated Slated for removal by OpenF1 at the end of 2026; often `null` already. */
+  country_code: string | null;
   driver_number: number;
   first_name: string;
   full_name: string;
@@ -91,62 +83,30 @@ export interface Interval {
 
 /** Detailed information about a single lap. */
 export interface Lap {
-  /**
-   * Approximate UTC start time of the lap, ISO 8601.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  date_start: string;
+  /** Approximate UTC start time of the lap, ISO 8601. */
+  date_start: string | null;
   driver_number: number;
-  /**
-   * Sector 1 time in seconds.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  duration_sector_1: number;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  duration_sector_2: number;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  duration_sector_3: number;
-  /**
-   * Speed (km/h) at the first intermediate point.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  i1_speed: number;
-  /**
-   * Speed (km/h) at the second intermediate point.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  i2_speed: number;
+  /** Sector 1 time in seconds. */
+  duration_sector_1: number | null;
+  duration_sector_2: number | null;
+  duration_sector_3: number | null;
+  /** Speed (km/h) at the first intermediate point. */
+  i1_speed: number | null;
+  /** Speed (km/h) at the second intermediate point. */
+  i2_speed: number | null;
   /** Whether this is the lap out of the pits. */
   is_pit_out_lap: boolean;
-  /**
-   * Total lap time in seconds.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  lap_duration: number;
+  /** Total lap time in seconds. */
+  lap_duration: number | null;
   lap_number: number;
   meeting_key: number;
-  /**
-   * Mini-sector colour codes for sector 1. Not available during races. Cannot be filtered.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  segments_sector_1: number[];
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  segments_sector_2: number[];
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  segments_sector_3: number[];
+  /** Mini-sector colour codes for sector 1. Not available during races. Cannot be filtered. */
+  segments_sector_1: (number | null)[] | null;
+  segments_sector_2: (number | null)[] | null;
+  segments_sector_3: (number | null)[] | null;
   session_key: number;
-  /**
-   * Speed (km/h) at the speed trap.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  st_speed: number;
+  /** Speed (km/h) at the speed trap. */
+  st_speed: number | null;
 }
 
 /** Approximate car position on the circuit, sampled at roughly 3.7 Hz. */
@@ -203,12 +163,8 @@ export interface Pit {
   lane_duration?: number | null;
   lap_number: number;
   meeting_key: number;
-  /**
-   * @deprecated Use `lane_duration`. Slated for removal by OpenF1 at the end of 2026.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  pit_duration: number;
+  /** @deprecated Use `lane_duration`. Slated for removal by OpenF1 at the end of 2026. */
+  pit_duration: number | null;
   session_key: number;
   /** Stationary time in seconds. Only available from the 2024 US GP onwards. */
   stop_duration?: number | null;
@@ -228,26 +184,16 @@ export interface RaceControl {
   /** e.g. "Flag", "SafetyCar", "Drs", "CarEvent", "Other". */
   category: string;
   date: string;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  driver_number: number;
-  /**
-   * e.g. "GREEN", "YELLOW", "DOUBLE YELLOW", "CHEQUERED", "BLACK AND WHITE".
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  flag: string;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  lap_number: number;
+  driver_number: number | null;
+  /** e.g. "GREEN", "YELLOW", "DOUBLE YELLOW", "CHEQUERED", "BLACK AND WHITE". */
+  flag: string | null;
+  lap_number: number | null;
   meeting_key: number;
   message: string;
   /** Qualifying part (1, 2 or 3) when relevant. */
   qualifying_phase?: number | null;
-  /**
-   * "Track", "Driver" or "Sector".
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  scope: string;
+  /** "Track", "Driver" or "Sector". */
+  scope: string | null;
   /** Mini-sector the message refers to, when `scope` is "Sector". */
   sector: number | null;
   session_key: number;
@@ -280,37 +226,23 @@ export interface SessionResult {
   dns: boolean;
   dsq: boolean;
   driver_number: number;
-  /**
-   * Total race time, or best lap time per qualifying part (`[Q1, Q2, Q3]`), in seconds.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  duration: number | number[];
-  /**
-   * Gap to the winner/pole in seconds, a "+N LAP(S)" string, or per qualifying part.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  gap_to_leader: number | string | number[];
+  /** Total race time, or best lap time per qualifying part (`[Q1, Q2, Q3]`), in seconds. */
+  duration: number | (number | null)[] | null;
+  /** Gap to the winner/pole in seconds, a "+N LAP(S)" string, or per qualifying part. */
+  gap_to_leader: number | string | (number | string | null)[] | null;
   meeting_key: number;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  number_of_laps: number;
+  number_of_laps: number | null;
   /** Championship points scored in this session. */
   points?: number | null;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  position: number;
+  position: number | null;
   session_key: number;
 }
 
 /** Starting grid for a race. */
 export interface StartingGrid {
   driver_number: number;
-  /**
-   * Qualifying lap time in seconds.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  lap_duration: number;
+  /** Qualifying lap time in seconds. */
+  lap_duration: number | null;
   meeting_key: number;
   position: number;
   session_key: number;
@@ -318,26 +250,16 @@ export interface StartingGrid {
 
 /** A stint: a run of consecutive laps on one set of tyres. */
 export interface Stint {
-  /**
-   * e.g. "SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET".
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  compound: string;
+  /** e.g. "SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET". */
+  compound: string | null;
   driver_number: number;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  lap_end: number;
-  /** Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility. */
-  lap_start: number;
+  lap_end: number | null;
+  lap_start: number | null;
   meeting_key: number;
   session_key: number;
   stint_number: number;
-  /**
-   * Tyre age in laps at the start of the stint.
-   *
-   * Can be `null` in API responses; typed non-null until 1.0 for backwards compatibility.
-   */
-  tyre_age_at_start: number;
+  /** Tyre age in laps at the start of the stint. */
+  tyre_age_at_start: number | null;
 }
 
 /** A team radio recording. Only a selection of exchanges is published. */

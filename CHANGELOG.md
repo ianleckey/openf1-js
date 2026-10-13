@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 1.0.0 (2026-11-13)
+
+The 0.2 API is now stable. See "Versioning" in the README for what that covers.
+
+#### ⚠ Breaking changes
+
+- **Response fields that OpenF1 can return as `null` are typed as nullable.** The affected types are `Lap`, `SessionResult`, `Stint`, `RaceControl`, `StartingGrid.lap_duration`, `CarData.drs`, `Driver.country_code` and `Pit.pit_duration`. This is type-only; runtime behaviour is unchanged.
+- **`Resource` and `SessionScope` are exported as types only.** Get instances from `f1.<endpoint>` and `f1.session()`.
+- **The `serializeQuery` helper is no longer exported.**
+
 ### 0.2.0 (2026-10-13)
 
 #### Features
